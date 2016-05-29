@@ -1,0 +1,63 @@
+﻿#before running this PowerShell script, you need to 
+#1. Login to AzureChinaCloud first, run the following command:
+# 		Login-AzureRmAccount -EnvironmentName AzureChinaCloud
+#2. Create a ResourceGroup, run the following command as example:
+# 		New-AzureRmResourceGroup -Name "YOUR-RESOURCE-GROUP-NAME" -Location "China East"
+
+param(
+	[Parameter(Mandatory=$true)]
+	[string]$ResourceGroupName,
+	[Parameter(Mandatory=$true)]
+	[string]$CentOSVersion,
+	[Parameter(Mandatory=$true)]
+	[string]$AdminUsername,
+	[Parameter(Mandatory=$true)]
+	[string]$AdminPassword,
+	[Parameter(Mandatory=$true)]
+	[string]$MySqlPassword,
+	[Parameter(Mandatory=$true)]
+	[string]$DNSNamePrefix,
+	[Parameter(Mandatory=$false)]
+	[string]$VmSize="Standard_A2",
+	[Parameter(Mandatory=$false)]
+	[int]$SizeOfDataDiskInGB="100",
+	[Parameter(Mandatory=$false)]
+	[string]$ZabbixServerIPAddress="Null"
+)
+
+
+$params=@{
+	CentOSVersion=$CentOSVersion;
+	adminUsername=$AdminUsername;
+	adminPassword=$AdminPassword;
+    mySqlPassword=$MySqlPassword;
+    sizeOfDataDiskInGB=$SizeOfDataDiskInGB;
+    dnsNamePrefix=$DNSNamePrefix;
+    vmSize=$VmSize;
+    zabbixServerIPAddress=$ZabbixServerIPAddress;
+}
+
+$TemplateUri="http://zabbixserver.chinacloudapp.cn/nginx/azuredeploy.json"
+
+$deployment = New-AzureRMResourceGroupDeployment -Name DeployZabbix -ResourceGroupName $ResourceGroupName -TemplateUri $TemplateUri -TemplateParameterObject $params
+
+if ($deployment.ProvisioningState -eq "Succeeded")
+{
+	echo "Deploy Nginx Server successfully."
+}
+else
+{
+	echo "Failed to deploy Nginx Server."
+	#exit 1
+}
+
+$nginxIp = Get-AzureRmPublicIpAddress -Name nginx-myPublicIP -ResourceGroupName $ResourceGroupName
+
+echo "To veriy the Nginx server deployment, following below steps:`n"
+echo "Open the URL  http://$($nginxIp.DnsSettings.Fqdn)/mysql.php to check if php can connect to MySQL, if can do some insert operation, and finally it will return the result on the web page. `n
+If you refresh the webpage, will insert another record into mysql db table.`n
+We strongly recommend you to delete /var/www/html/mysql.php after you access the URL and see the successful result because mysql.php stores your mysql root password.`n
+You can delete the inserted data by executing below commands:`n
+mysql -uroot -p`n
+drop database testdb;`n
+"

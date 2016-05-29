@@ -1,0 +1,30 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "value": "azureuser"
+    },
+    "adminPassword": {
+      "value": "DevDay!123"
+    },
+    "sizeOfDataDiskInGB": {
+      "value": 100
+    },
+    "dnsNamePrefix": {
+      "value": "devdaydemo2"
+    },
+    "mySqlPassword": {
+      "value": "DevDay!123"
+    },
+    "VmSize": {
+      "value": "Standard_A2"
+    },
+    "CentOSVersion": {
+      "value": "7.0"
+    },
+    "zabbixServerIPAddress": {
+      "value": "Null"
+    }
+  }
+}
